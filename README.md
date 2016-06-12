@@ -10,6 +10,7 @@
   - systemd-analyze blame                                       # 查看每个服务的启动耗时
   - systemd-analyze critical-chain                            # 显示瀑布状的启动过程流
   - systemd-analyze critical-chain atd.service        # 显示指定服务的启动流
+  - systemd-analyze dot <unit>                                # 以dot文件格式输出unit之间的依赖关系（依赖和被依赖）
 
 
 - **hostnamectl**
@@ -68,7 +69,7 @@ Systemd可以管理的所有系统资源，不同的资源统称为Unit。
 
   - Unit依赖关系
 
-    - systemctl list-dependencies <unit>                    # 列出Unit的所有依赖
+    - systemctl list-dependencies <unit>                    # 列出Unit的所有依赖(wanted/required)
 
     - systemctl list-dependencies --all <unit>             # 列出Unit的所有依赖，并展开Target 类型的Unit依赖
 
@@ -104,7 +105,18 @@ Systemd可以管理的所有系统资源，不同的资源统称为Unit。
   - systemctl daemon-reload
   - systemctl restart <unit>
 
-### 4. journalctl 日志管理命令
+### 5. unit dependencies 和启动时序、耗时（个人理解）
+  查看unit之间的依赖关系可以使用的命令：systemctl list-dependencies <unit>、systemd-analyze blame、 systemd-analyze critical-chain <units>、 systemd-analyze dot <units>
+- systemctl list-dependencies <unit> : 列出的只是required 和 wanted 的依赖关系
+- systemd-analyze dot <units>: 以dot文件格式列出指定的unit(s)的依赖关系和被依赖关系
+- systemd-analyze blame: 列出当前运行的unit在系统init的时候，所耗费的时间（排序）
+- systemd-analyze critical-chain <units> : 显示某个unit在启动时的每一个关键节点及耗时
+
+**注意:**
+- systemctl list-dependencies <unit> 列出的只是required 和 wanted 的依赖关系，以树状显示，可以通过--all 参数展开target的依赖关系
+- systemd-analyze dot <units> 列出的是这(几)个unit的所有依赖和被依赖的关系(Requires, Wanted, After, Before, Conflicts...) ；dot格式的输出，可以使用在线工具[WebGraphviz](http://www.webgraphviz.com/)来绘图（为了更好地进行展示，可以通过调整dot输出的依赖关系的顺序(按启动时序顺序)、删除重复的依赖关系(去重)、删除不关注的节点来优化图形展示结果）。
+
+### 6. journalctl 日志管理命令
 
 ```
 # 查看所有日志（默认情况下 ，只保存本次启动的日志）
